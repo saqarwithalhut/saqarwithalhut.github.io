@@ -1,0 +1,28 @@
+{
+  "id": "saqr_leaders_pwa",
+  "scope": ".",
+  "name": "صقر | لوحة الليدرز",
+  "short_name": "ليدرز صقر",
+  "description": "لوحة الليدرز والموظفين لمراقبة الرادار والتوزيع — صقر للتوصيل، كركوك",
+  "start_url": "./liderdodsas.html?app=1",
+  "lang": "ar",
+  "dir": "rtl",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "./leaders-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./master-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

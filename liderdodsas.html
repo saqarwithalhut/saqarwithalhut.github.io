@@ -7,8 +7,21 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<script>
+(function() {
+ try {
+  var app = /[?&]app=1(&|$)/.test(location.search) || window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  if (!app || screen.width >= 1180) return;
+  var m = document.querySelector('meta[name="viewport"]');
+  if (m) m.setAttribute("content", "width=1200,user-scalable=yes,viewport-fit=cover");
+ } catch (e) {}
+})();
+</script>
 <title>صقر — لوحة الموظفين</title>
 <link rel="icon" type="image/png" href="master-logo.png">
+<link rel="manifest" href="manifest_leaders.json">
+<link rel="apple-touch-icon" href="master-logo.png">
+<meta name="apple-mobile-web-app-title" content="ليدرز صقر">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 
