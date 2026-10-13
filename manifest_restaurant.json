@@ -1,0 +1,43 @@
+{
+  "id": "saqr_restaurant_pwa",
+  "scope": ".",
+  "name": "صقر للتوصيل والنقل | بوابة الشركاء",
+  "short_name": "شركاء صقر",
+  "description": "منصة إدارة طلبات التوصيل لمكتب صقر في كركوك",
+  "start_url": "./restaurant.html",
+  "lang": "ar",
+  "dir": "rtl",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4a2a12",
+  "icons": [
+    {
+      "src": "./rest-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./rest-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "تصوير وصل جديد",
+      "short_name": "تصوير سريع",
+      "description": "افتح الكاميرا لإرسال طلب فوري",
+      "url": "./restaurant.html?mode=photo",
+      "icons": [{ "src": "./rest-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "الطلبات قيد التوصيل",
+      "short_name": "الطلبات النشطة",
+      "description": "متابعة الطلبات المفتوحة حالياً",
+      "url": "./restaurant.html?tab=live",
+      "icons": [{ "src": "./rest-logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
