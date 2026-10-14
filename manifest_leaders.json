@@ -4,13 +4,12 @@
   "name": "صقر | لوحة الليدرز",
   "short_name": "ليدرز صقر",
   "description": "لوحة الليدرز والموظفين لمراقبة الرادار والتوزيع — صقر للتوصيل، كركوك",
-  "start_url": "./liderdodsas.html?app=1",
+  "start_url": "./liderdodsas.html",
   "lang": "ar",
   "dir": "rtl",
   "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#ffffff",
-  "theme_color": "#111111",
+  "background_color": "#f8fafc",
+  "theme_color": "#4a2a12",
   "icons": [
     {
       "src": "./leaders-icon-192.png",
