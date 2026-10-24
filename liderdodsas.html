@@ -6283,7 +6283,7 @@ async function avCall(action, args, _retry) {
   const ctrl = new AbortController, tm = setTimeout(() => ctrl.abort(), 3e4);
   let r;
   try {
-   r = await fetch("https://europe-west1-" + pid + ".cloudfunctions.net/advisorAction", {
+   r = await fetch("https://europe-west4-" + pid + ".cloudfunctions.net/advisorAction", {
     method: "POST",
     headers: {
      "Content-Type": "application/json",

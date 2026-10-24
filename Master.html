@@ -1934,8 +1934,13 @@ function fbLib(name) {
  });
 }
 
+const FN_W4 = {
+ advisorAction: 1,
+ adminDriverAccount: 1
+};
+
 function fnCall(name, payload) {
- return fbLib("functions").then(() => firebase.app().functions("europe-west1").httpsCallable(name)(payload));
+ return fbLib("functions").then(() => firebase.app().functions(FN_W4[name] ? "europe-west4" : "europe-west1").httpsCallable(name)(payload));
 }
 
 function opMod(id) {
