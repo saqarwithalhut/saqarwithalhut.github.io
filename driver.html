@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://*.firebasedatabase.app https://*.firebaseio.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://firebasestorage.googleapis.com https://*.firebasestorage.app https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://www.gstatic.com; object-src 'none'; base-uri 'none'; form-action 'self';">
 
 <script>
-const CURRENT_APP_VERSION = "32.19-OneKick";
+const CURRENT_APP_VERSION = "32.25-Saqr";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -296,6 +296,8 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 .rp-t{font-size:.66rem;font-weight:800;color:var(--muted);margin-bottom:3px;}
 .rp-n{font-size:1.02rem;font-weight:800;color:var(--ink);line-height:1.35;}
 .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.refz{display:block;width:100%;margin-top:9px;height:40px;border-radius:12px;border:1px solid #F1C9C4;background:#FFF6F5;color:#B42318;font-weight:800;font-size:.8rem;font-family:inherit;cursor:pointer;}   
+.refz:disabled{opacity:.6;}
 .act{flex:1;min-width:84px;padding:10px 8px;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;
   font-size:.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;
   background:#fff;border:1px solid var(--line);transition:border-color .16s var(--ease);}
@@ -316,6 +318,16 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 .sup-dot{position:absolute;top:-3px;left:-3px;width:11px;height:11px;border-radius:50%;background:var(--bad);
   border:2px solid var(--clay);display:none;}
 .sup-dot.on{display:block;animation:blink 1.3s infinite;}
+.sup-fab{position:fixed;left:14px;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 84px);z-index:9000;display:flex;align-items:center;gap:7px;
+  height:50px;padding:0 16px 0 14px;border-radius:999px;border:none;background:var(--royal);color:#fff;font-family:inherit;font-weight:800;font-size:.86rem;
+  box-shadow:0 8px 22px rgba(0,0,0,.25);cursor:pointer;animation:supPulse 1.6s infinite;}
+.sup-fab[hidden]{display:none;}
+.sup-fab .sup-dot{position:absolute;top:-2px;left:-2px;}
+@keyframes supPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.await-bar{position:fixed;left:12px;right:12px;top:calc(max(10px,env(safe-area-inset-top)) + 4px);z-index:9500;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:10px 14px;border-radius:14px;border:none;background:#B42318;color:#fff;font-family:inherit;text-align:center;box-shadow:0 8px 22px rgba(180,35,24,.35);cursor:pointer;}
+.await-bar[hidden]{display:none;}
+.await-bar b{font-size:.92rem;} .await-bar span{font-size:.74rem;opacity:.92;}
 #toasts{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:60000;
   display:flex;flex-direction:column;gap:9px;width:93%;max-width:390px;pointer-events:none;}
 .toast{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:var(--r);background:#fff;
@@ -1037,6 +1049,9 @@ window.__SND = {
 </div>
 
 <div id="toasts"></div>
+
+<button type="button" id="supFab" class="sup-fab" onclick="openChat()" aria-label="محادثة الليدر" hidden><svg class="si si-s" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>الليدر</span><span class="sup-dot on" id="chatDot"></span></button>
+<button type="button" id="awaitBar" class="await-bar" onclick="openChat()" hidden><b>⚠️ الليدر ينتظر جوابك على سؤاله</b><span>اضغط هنا وجاوب — التجاهل يوقف حسابك</span></button>
 
 <script>
 const LEGAL_DOCS = {
@@ -3790,7 +3805,9 @@ const EFF_TXT = {
  off_by_admin: "⛔ أوقفك المدير",
  off_by_break: "☕ في استراحة (من الإشعار)",
  off_by_captain: "⚪ في استراحة",
- insurance_due: "🛡️ غير مرئيّ: قسط التأمين متأخّر — سلّمه للإدارة وترجع تلقائياً"
+ insurance_due: "🛡️ غير مرئيّ: قسط التأمين متأخّر — سلّمه للإدارة وترجع تلقائياً",
+ account_off: "⛔ حسابك موقوف من الإدارة — لا تصلك طلبات. راجع الإدارة.",
+ ops_block: "⛔ حسابك موقوف عن استلام الطلبات. راجع الإدارة في مكتبها لحلّ الموضوع."
 };
 
 function setDesired(online, by) {
@@ -3852,6 +3869,10 @@ function paintEffective(reason) {
   }
   el.textContent = EFF_TXT[reason] || "غير مرئيّ: " + reason;
   el.style.color = reason === "ok" ? "#16a34a" : /off_by/.test(reason) ? "#64748b" : "#dc2626";
+  el.style.fontSize = reason === "ops_block" ? ".92rem" : ".78rem";
+  el.style.background = reason === "ops_block" ? "#fee2e2" : "";
+  el.style.borderRadius = reason === "ops_block" ? "10px" : "";
+  el.style.padding = reason === "ops_block" ? "8px 10px" : "";
  } catch (e) {
   track("eff_paint_fail");
  }
@@ -3960,7 +3981,12 @@ function insState(cfgRaw, acc, nowMs) {
  const expectedNow = Math.min(target, (weeksPast + (dueThis >= today ? 1 : 0)) * c.weekly);
  base.expected = expectedPast;
  base.due_date = dueThis;
- if (paid < expectedPast) return Object.assign(base, {
+ const gu = /^\d{4}-\d{2}-\d{2}$/.test(String(c.grace_until || "")) ? String(c.grace_until) : "";
+ if (paid < expectedPast) return gu && today <= gu ? Object.assign(base, {
+  state: "overdue",
+  owed: expectedPast - paid,
+  block_from: add(gu, 1)
+ }) : Object.assign(base, {
   state: "blocked",
   owed: expectedPast - paid
  });
@@ -4005,6 +4031,7 @@ function paintInsurance() {
    upcoming: "🗓️ قسط هذا الأسبوع (" + insFmt(s.owed) + " د.ع) يوم " + (s.due_date ? insDateAr(s.due_date) : ""),
    due_today: "⚠️ اليوم يوم قسطك (" + insFmt(s.owed) + " د.ع) — سلّمه للإدارة اليوم حتى لا يتوقّف استلامك للطلبات من باچر.",
    blocked: "🔴 قسط التأمين متأخّر (" + insFmt(s.owed) + " د.ع) — أنت غير مرئيّ للطلبات حتى تؤكّد الإدارة الاستلام.",
+   overdue: "⚠️ قسط التأمين متأخّر (" + insFmt(s.owed) + " د.ع) — سلّمه للإدارة. هذا الأسبوع تنبيهٌ فقط وطلباتك مستمرّة، ومن يوم " + (s.block_from ? insDateAr(s.block_from) : "") + " يتوقّف استلامك للطلبات حتى تؤكّد الإدارة.",
    complete: "🎉 اكتمل تأمينك بالكامل — لا أقساط بعد اليوم.",
    exempt: "ℹ️ أنت معفى من التأمين.",
    left: "ℹ️ مسجَّلٌ أنك تركت العمل — تُعاد تأميناتك بعد " + (Number(cfg.refund_days) || 30) + " يوماً من تركك.",
@@ -4012,7 +4039,7 @@ function paintInsurance() {
   };
   const se = document.getElementById("insState");
   se.innerText = ST[s.state] || "";
-  se.style.color = s.state === "blocked" ? "var(--bad-dp)" : s.state === "due_today" ? "var(--warn-dp)" : "var(--ink2)";
+  se.style.color = s.state === "blocked" ? "var(--bad-dp)" : s.state === "due_today" || s.state === "overdue" ? "var(--warn-dp)" : "var(--ink2)";
   document.getElementById("insHist").innerHTML = pays.length ? pays.map(p => "• " + insFmt(p.amount) + " د.ع — " + (p.at ? new Date(Number(p.at) + 3 * 36e5).toISOString().slice(0, 10) : "")).join("<br>") : "لا دفعات بعد.";
   const nd = Number(cfg.notice_days) || 15, rd = Number(cfg.refund_days) || 30;
   document.getElementById("insPolicy").innerText = "التأمين لتنظيم العمل وتجهيزك بالزيّ والمستلزمات المناسبة. وإذا قرّرت ترك العمل يجب أن تُبلغ الإدارة قبل " + nd + " يوماً، وتُعاد لك تأميناتك بعد " + rd + " يوماً من تركك العمل.";
@@ -4025,6 +4052,16 @@ function paintInsurance() {
   } else {
    nb.style.display = s.state === "exempt" ? "none" : "";
    nt.style.display = "none";
+  }
+  if (s.state === "overdue") {
+   const k = "saqr_ins_over_" + new Date(srvNow() + 3 * 36e5).toISOString().slice(0, 10);
+   try {
+    if (!localStorage.getItem(k)) {
+     localStorage.setItem(k, "1");
+     toast("⚠️ قسط التأمين متأخّر (" + insFmt(s.owed) + " د.ع) — سلّمه للإدارة قبل " + (s.block_from ? insDateAr(s.block_from) : ""), "warn");
+     track("ins_overdue_warn");
+    }
+   } catch (_) {}
   }
   if (s.state === "due_today") {
    const k = "saqr_ins_warn_" + (s.due_date || "");
@@ -5974,7 +6011,8 @@ function _offerScan(fb, myId, pump) {
   resArea: f.resArea || null,
   comm: f.comm || 0,
   payType: f.payType || "المطعم يدفع",
-  is_sovereign: f.is_sovereign || false
+  is_sovereign: f.is_sovereign || false,
+  itt: f.src === "ittihad"
  };
  curOrder.okey = _offerKey(f);
  const _stamp = f.last_update ? new Date(f.last_update).getTime() : 0;
@@ -6135,7 +6173,8 @@ function listenOrders() {
      acceptedTime: srvMs,
      pickupTime: st2 === "picked_up" ? Math.min(srvMs, Date.now() - MIN_PICKUP_SECS * 1e3) : null,
      is_sovereign: f.is_sovereign || false,
-     readyForPickup: f.ready_for_pickup === true
+     readyForPickup: f.ready_for_pickup === true,
+     itt: f.src === "ittihad"
     });
     if (f.ready_for_pickup === true) readySet.add(oid);
     restored++;
@@ -6432,7 +6471,8 @@ function finalizeAccept() {
   payType: curOrder.payType || "المطعم يدفع",
   acceptedTime: Date.now(),
   is_sovereign: curOrder.is_sovereign || false,
-  readyForPickup: false
+  readyForPickup: false,
+  itt: !!curOrder.itt
  };
  active.push(o);
  localStorage.setItem("saqr_orders", JSON.stringify(active));
@@ -6749,12 +6789,15 @@ function renderOrders() {
   const cm = det.match(/(07[0-9]{8,9})/);
   const cp = cm ? String(cm[0]) : null;
   const mp = o.resLat ? `https://www.google.com/maps/dir/?api=1&destination=${o.resLat},${o.resLng}` : "";
+  const cpin = det.match(/maps\.google\.com\/\?q=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  const cmp = cpin ? `https://www.google.com/maps/dir/?api=1&destination=${cpin[1]},${cpin[2]}` : "";
+  const isItt = o.itt || /^🛒 طلب «اتحاد المتاجر»/.test(det);
   const tags = dbl ? `<span class="pill p-warn">🔥 مزدوج (${idx + 1}/${active.length})</span>` : "";
   const ready = o.readyForPickup ? `<div class="ready">${ICO.bell}<span class="ready-t">🍽️ الطلبية جاهزة — توجّه للاستلام!</span></div>` : "";
   const photo = o.photoUrl && /^https:\/\//.test(String(o.photoUrl)) ? `<button class="act a-img" data-receipt="${esc(o.photoUrl)}" onclick="openReceipt(this.dataset.receipt)">${ICO.img} الوصل</button>` : "";
   if (!o.resArea) enrichOrder(o);
   const pick = o.resArea ? ` (${esc(o.resArea)})` : "";
-  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">بالمطعم</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        <div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n      </div></div>`;
+  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">بالمطعم</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        <div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
  });
  if (lastHtml !== html) {
   box.innerHTML = html;
@@ -6778,6 +6821,29 @@ function timers() {
 }
 
 setInterval(timers, 1e3);
+
+window.ittRefused = async function(id, btn) {
+ if (!confirm("اتّصلت بالزبون ووقفت عند بابه وما استلم الطلب؟\nيُسجَّل البلاغ بموقعك الحاليّ، والطلب يبقى باسمك حتى يكلّمك الليدر عن إرجاعه للمطعم.")) return;
+ const orig = btn.innerHTML;
+ btn.disabled = true;
+ btn.textContent = "يُرسل…";
+ try {
+  const d = await drvAction("ITT_REFUSED", id, "", 12e3);
+  if (d && d.success) {
+   btn.textContent = "✓ وصل البلاغ للإدارة";
+   toast(d.near || d.already ? "✅ وصل البلاغ — الليدر يكلّمك عن إرجاع الطلب للمطعم." : "✅ وصل البلاغ. موقعك لا يظهر عند باب الزبون — قف عند الدبّوس واتّصل بالليدر.", "ok");
+   try {
+    openChat();
+   } catch (_) {}
+   return;
+  }
+  toast("⚠️ " + (d && d.msg || "تعذّر الإرسال — أعد المحاولة."), "bad");
+ } catch (e) {
+  toast("⚠️ تعذّر الإرسال — تأكّد من الشبكة وأعد المحاولة.", "bad");
+ }
+ btn.disabled = false;
+ btn.innerHTML = orig;
+};
 
 window.orderAction = function(id, act, btn) {
  const o = active.find(x => String(x.id) === String(id));
@@ -7061,6 +7127,11 @@ window.openChat = async function() {
  } catch (e) {}
  document.querySelectorAll(".sup-dot,#chatDot").forEach(d => d.classList.remove("on"));
  try {
+  const fab = document.getElementById("supFab"), bar = document.getElementById("awaitBar");
+  if (fab) fab.hidden = true;
+  if (bar) bar.hidden = true;
+ } catch (_) {}
+ try {
   const s = await withTimeout(get(ref(db, cPath() + "/status")), NET_TIMEOUT_MS, "chat");
   const st = s.val();
   if (!st || st === "closed") {
@@ -7087,6 +7158,11 @@ window.openChat = async function() {
 window.closeChat = function() {
  document.getElementById("chat").classList.add("dn");
  chatOpen = false;
+ try {
+  const un = Number(chatMeta && chatMeta.unread_driver || 0), aw = chatMeta && chatMeta.await && chatMeta.await.at, fab = document.getElementById("supFab"), bar = document.getElementById("awaitBar");
+  if (fab) fab.hidden = !(un > 0 || aw);
+  if (bar) bar.hidden = !aw;
+ } catch (_) {}
 };
 
 let _chImg = null;
@@ -7242,6 +7318,11 @@ function startChat() {
   document.querySelectorAll(".sup-dot,#chatDot").forEach(dot => {
    if (!chatOpen && un > 0) dot.classList.add("on"); else dot.classList.remove("on");
   });
+  try {
+   const fab = document.getElementById("supFab"), bar = document.getElementById("awaitBar"), aw = d.await && d.await.at;
+   if (fab) fab.hidden = chatOpen || !(un > 0 || aw);
+   if (bar) bar.hidden = chatOpen || !aw;
+  } catch (_) {}
   if (!chatOpen && un > 0 && d.last_msg_at > chatSeen && d.last_from === "leader") {
    chatSeen = d.last_msg_at;
    play("ready");
